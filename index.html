@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Peraga Garis Bilangan — Penjumlahan &amp; Pengurangan Bilangan Bulat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Space+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #16241f;
+    --panel: #1e332b;
+    --panel-2: #223a30;
+    --chalk: #f4f1e8;
+    --chalk-dim: #b9c4bc;
+    --gold: #f2a93b;
+    --coral: #e85d4e;
+    --teal: #4fb6a6;
+    --line-w: 3px;
+    --radius: 14px;
+  }
+  *{ box-sizing: border-box; }
+  html,body{
+    margin:0; padding:0; min-height:100%;
+    background: radial-gradient(ellipse at 50% -10%, #1c3129 0%, #16241f 55%, #101c17 100%);
+    color: var(--chalk);
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  body{ padding: 32px 20px 60px; }
+
+  .wrap{ max-width: 980px; margin: 0 auto; }
+
+  header{ text-align:center; margin-bottom: 28px; }
+  header .eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    font-size: 12px;
+    color: var(--teal);
+    margin-bottom: 8px;
+  }
+  header h1{
+    font-family:'Fredoka', sans-serif;
+    font-weight: 700;
+    font-size: clamp(28px, 4.2vw, 44px);
+    margin: 0 0 6px;
+    line-height: 1.15;
+  }
+  header h1 .hop{ color: var(--gold); }
+  header p{
+    color: var(--chalk-dim);
+    max-width: 560px;
+    margin: 0 auto;
+    font-size: 15px;
+  }
+
+  .panel{
+    background: linear-gradient(180deg, var(--panel), var(--panel-2));
+    border: 1px solid rgba(244,241,232,0.08);
+    border-radius: var(--radius);
+    padding: 22px;
+    margin-bottom: 20px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+  }
+
+  .controls{
+    display:flex; flex-wrap: wrap; gap: 14px; align-items:flex-end; margin-bottom: 6px;
+  }
+  .field{ display:flex; flex-direction:column; gap:6px; }
+  .field label{
+    font-size: 11px; letter-spacing:.08em; text-transform:uppercase;
+    color: var(--chalk-dim); font-family:'JetBrains Mono', monospace;
+  }
+  select, input[type=number]{
+    background: #0f1c17;
+    border: 1px solid rgba(244,241,232,0.15);
+    color: var(--chalk);
+    border-radius: 9px;
+    padding: 9px 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    width: 92px;
+    outline: none;
+  }
+  select:focus, input:focus{ border-color: var(--teal); box-shadow: 0 0 0 3px rgba(79,182,166,0.25); }
+  select#difficulty{ width: 140px; }
+
+  .expr-preview{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--gold);
+    padding: 9px 4px;
+    min-width: 140px;
+  }
+
+  button{
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    border: none;
+    border-radius: 10px;
+    padding: 11px 18px;
+    cursor: pointer;
+    transition: transform .12s ease, filter .12s ease;
+  }
+  button:active{ transform: translateY(1px) scale(.98); }
+  button:focus-visible{ outline: 3px solid var(--teal); outline-offset: 2px; }
+  .btn-primary{ background: var(--gold); color: #1a1305; }
+  .btn-primary:hover{ filter: brightness(1.08); }
+  .btn-secondary{ background: transparent; color: var(--chalk); border: 1.5px solid rgba(244,241,232,0.3); }
+  .btn-secondary:hover{ border-color: var(--teal); color: var(--teal); }
+  .btn-ghost{ background: rgba(244,241,232,0.06); color: var(--chalk-dim); }
+  .btn-ghost:hover{ color: var(--chalk); }
+  button:disabled{ opacity:.35; cursor:not-allowed; }
+
+  .action-row{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 14px; }
+
+  .stage{
+    position: relative;
+    width: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+    background: repeating-linear-gradient(180deg, #132119 0px, #132119 2px, #16241f 2px, #16241f 40px);
+    border: 1px solid rgba(244,241,232,0.06);
+  }
+  #stageCanvas{ display:block; width:100%; height: 320px; touch-action: none; }
+
+  .readout{
+    display:flex; justify-content: space-between; align-items:flex-start;
+    gap: 18px; margin-top: 16px; flex-wrap: wrap;
+  }
+  .step-note{
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--chalk);
+    background: rgba(79,182,166,0.08);
+    border-left: 3px solid var(--teal);
+    padding: 12px 14px;
+    border-radius: 0 8px 8px 0;
+    flex: 1 1 320px;
+    min-height: 22px;
+  }
+  .step-note b{ color: var(--gold); }
+  .step-note .rule{ color: var(--teal); font-weight: 600; }
+
+  .step-nav{ display:flex; align-items:center; gap:10px; flex: 0 0 auto; }
+  .step-dots{ display:flex; gap: 6px; }
+  .dot{ width:8px; height:8px; border-radius:50%; background: rgba(244,241,232,0.2); }
+  .dot.active{ background: var(--gold); }
+
+  footer{ text-align:center; margin-top: 22px; color: var(--chalk-dim); font-size: 12.5px; }
+  footer span{ color: var(--teal); font-family:'JetBrains Mono', monospace; }
+
+  .rules-card{
+    margin-bottom: 20px;
+    border-radius: var(--radius);
+    border: 1px solid rgba(79,182,166,0.3);
+    background: linear-gradient(180deg, rgba(79,182,166,0.10), rgba(79,182,166,0.04));
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transition: max-height .4s ease, opacity .3s ease, margin .4s ease;
+  }
+  .rules-card.open{
+    max-height: 640px;
+    opacity: 1;
+  }
+  .rules-card .rules-inner{ padding: 20px 24px; }
+  .rules-card h2{
+    font-family:'Fredoka', sans-serif;
+    font-size: 18px;
+    margin: 0 0 12px;
+    color: var(--teal);
+    display:flex; align-items:center; gap:8px;
+  }
+  .rules-card ul{
+    margin: 0; padding: 0; list-style: none;
+    display:grid; gap: 10px;
+  }
+  .rules-card li{
+    display:flex; align-items:flex-start; gap:10px;
+    font-size: 14.5px; line-height: 1.5; color: var(--chalk);
+  }
+  .rules-card li .swatch{
+    flex: 0 0 auto;
+    width: 14px; height: 14px; border-radius: 4px;
+    margin-top: 3px;
+  }
+  .rules-card li b{ color: var(--gold); }
+  .rules-card .divider{
+    height: 1px;
+    background: rgba(244,241,232,0.12);
+    margin: 14px 0;
+    border: none;
+  }
+  .rules-card table{ width:100%; border-collapse: collapse; font-size: 14px; }
+  .rules-card table th{
+    text-align:left; font-family:'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing:.06em; text-transform: uppercase;
+    color: var(--chalk-dim); padding: 4px 8px 6px 0;
+    border-bottom: 1px solid rgba(244,241,232,0.15);
+  }
+  .rules-card table td{
+    padding: 7px 8px 7px 0;
+    border-bottom: 1px solid rgba(244,241,232,0.06);
+  }
+  .rules-card table td.dir{ color: var(--teal); font-weight: 600; }
+
+  #btnRules .chev{ display:inline-block; transition: transform .25s ease; margin-left: 2px; }
+  #btnRules.open .chev{ transform: rotate(180deg); }
+
+  .result-card{
+    display:flex; align-items:center; gap:16px;
+    margin-top: 16px;
+    padding: 16px 20px;
+    border-radius: 12px;
+    background: rgba(242,169,59,0.08);
+    border: 1.5px solid rgba(242,169,59,0.35);
+    opacity: 0; transform: translateY(6px);
+    transition: opacity .35s ease, transform .35s ease;
+    pointer-events: none;
+  }
+  .result-card.show{ opacity: 1; transform: translateY(0); }
+  .result-card .result-label{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing:.1em; text-transform:uppercase;
+    color: var(--chalk-dim);
+  }
+  .result-card .result-expr{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 16px; color: var(--chalk-dim); margin-top: 2px;
+  }
+  .result-card .result-value{
+    font-family:'Fredoka', sans-serif;
+    font-weight: 700;
+    font-size: 40px;
+    color: var(--gold);
+    margin-left: auto;
+    text-shadow: 0 0 20px rgba(242,169,59,0.35);
+  }
+
+  @media (max-width: 560px){
+    .controls{ gap: 10px; }
+    select#difficulty{ width: 120px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Matematika Kelas 7 &middot; Bilangan Bulat</div>
+    <h1>Peraga <span class="hop">Lompatan</span> pada Garis Bilangan</h1>
+    <p>Lihat bagaimana penjumlahan dan pengurangan bilangan bulat bergerak di atas garis bilangan, langkah demi langkah.</p>
+    <div style="margin-top:14px;">
+      <button class="btn-secondary" id="btnRules">📋 Ketentuan Peragaan <span class="chev">▾</span></button>
+    </div>
+  </header>
+
+  <div class="rules-card" id="rulesCard">
+    <div class="rules-inner">
+      <h2>📋 Ketentuan Peragaan</h2>
+      <ul>
+        <li><span class="swatch" style="background:#f4f1e8;"></span> Titik selalu <b>mulai dari 0</b> pada garis bilangan.</li>
+        <li><span class="swatch" style="background:#f2a93b;"></span> Lompatan warna <b>emas</b> menempatkan bilangan <b>a</b> (titik awal soal).</li>
+        <li><span class="swatch" style="background:#e85d4e;"></span> Lompatan warna <b>koral</b> adalah hasil operasi dengan bilangan <b>b</b>.</li>
+      </ul>
+      <hr class="divider">
+      <table>
+        <tr><th>Operasi</th><th>Tanda b</th><th>Arah lompatan</th></tr>
+        <tr><td>Tambah (+)</td><td>positif</td><td class="dir">Kanan</td></tr>
+        <tr><td>Tambah (+)</td><td>negatif</td><td class="dir">Kiri</td></tr>
+        <tr><td>Kurang (&minus;)</td><td>positif</td><td class="dir">Kiri (kebalikan arah)</td></tr>
+        <tr><td>Kurang (&minus;)</td><td>negatif</td><td class="dir">Kanan (dua minus jadi plus)</td></tr>
+      </table>
+      <hr class="divider">
+      <ul>
+        <li><b>Peragakan</b> menyiapkan titik mulai di 0.</li>
+        <li><b>Langkah Berikutnya</b> menjalankan lompatan satu per satu — tekan sampai hasil akhir muncul.</li>
+        <li><b>Soal Acak</b> membuat soal baru sesuai tingkat kesulitan yang dipilih.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="controls">
+      <div class="field">
+        <label for="difficulty">Tingkat</label>
+        <select id="difficulty">
+          <option value="easy">Mudah (-10 s/d 10)</option>
+          <option value="medium" selected>Sedang (-20 s/d 20)</option>
+          <option value="hard">Sulit (-30 s/d 30)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="numA">Bilangan a</label>
+        <input type="number" id="numA" value="5">
+      </div>
+      <div class="field">
+        <label for="operator">Operasi</label>
+        <select id="operator">
+          <option value="+">+  (tambah)</option>
+          <option value="-">&minus;  (kurang)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="numB">Bilangan b</label>
+        <input type="number" id="numB" value="-3">
+      </div>
+      <div class="expr-preview" id="exprPreview">5 + (&minus;3) = ?</div>
+    </div>
+
+    <div class="action-row">
+      <button class="btn-primary" id="btnPlay">▶ Peragakan</button>
+      <button class="btn-secondary" id="btnStep">Langkah Berikutnya</button>
+      <button class="btn-ghost" id="btnRandom">🎲 Soal Acak</button>
+      <button class="btn-ghost" id="btnReset">↺ Ulangi</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="stage">
+      <canvas id="stageCanvas"></canvas>
+    </div>
+    <div class="readout">
+      <div class="step-note" id="stepNote">Atur soal di atas, lalu tekan <b>Peragakan</b> atau <b>Langkah Berikutnya</b> untuk mulai.</div>
+      <div class="step-nav">
+        <div class="step-dots" id="stepDots"></div>
+      </div>
+    </div>
+
+    <div class="result-card" id="resultCard">
+      <div>
+        <div class="result-label">Hasil Akhir</div>
+        <div class="result-expr" id="resultExpr">5 + (&minus;3)</div>
+      </div>
+      <div class="result-value" id="resultValue">2</div>
+    </div>
+  </div>
+
+  <footer>Arah lompatan mengikuti <span>aturan tanda</span> — kanan untuk menambah/positif, kiri untuk mengurangi/negatif.</footer>
+</div>
+
+<script>
+(function(){
+  const canvas = document.getElementById('stageCanvas');
+  const ctx = canvas.getContext('2d');
+  const stepNote = document.getElementById('stepNote');
+  const stepDotsEl = document.getElementById('stepDots');
+  const exprPreview = document.getElementById('exprPreview');
+  const resultCard = document.getElementById('resultCard');
+  const resultExpr = document.getElementById('resultExpr');
+  const resultValue = document.getElementById('resultValue');
+
+  const difficultyEl = document.getElementById('difficulty');
+  const numAEl = document.getElementById('numA');
+  const numBEl = document.getElementById('numB');
+  const operatorEl = document.getElementById('operator');
+
+  const btnPlay = document.getElementById('btnPlay');
+  const btnStep = document.getElementById('btnStep');
+  const btnRandom = document.getElementById('btnRandom');
+  const btnReset = document.getElementById('btnReset');
+  const btnRules = document.getElementById('btnRules');
+  const rulesCard = document.getElementById('rulesCard');
+
+  btnRules.addEventListener('click', () => {
+    const open = rulesCard.classList.toggle('open');
+    btnRules.classList.toggle('open', open);
+  });
+
+  const RANGES = { easy: 10, medium: 20, hard: 30 };
+
+  let rangeMax = 20, rangeMin = -20;
+  let dpr = Math.max(1, window.devicePixelRatio || 1);
+  let W = 0, H = 0;
+
+  // Animation / step state
+  let steps = [];       // list of step descriptors
+  let stepIndex = -1;   // current step shown (-1 = nothing yet)
+  let anim = null;      // active animation object
+  let arcs = [];         // completed arcs to draw (trails)
+  let currentPos = 0;    // marker resting position (data units)
+
+  function resize(){
+    const rect = canvas.parentElement.getBoundingClientRect();
+    W = rect.width; H = 320;
+    canvas.width = W * dpr; canvas.height = H * dpr;
+    canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    draw();
+  }
+  window.addEventListener('resize', resize);
+
+  function computeRange(a,b,op){
+    const d = RANGES[difficultyEl.value] || 20;
+    let lo = -d, hi = d;
+    const result = op === '+' ? a + b : a - b;
+    const candidates = [0, a, result];
+    candidates.forEach(v => { if (v < lo) lo = v - 2; if (v > hi) hi = v + 2; });
+    return {lo, hi};
+  }
+
+  function niceStep(range){
+    if (range <= 24) return 1;
+    if (range <= 50) return 2;
+    if (range <= 90) return 5;
+    return 10;
+  }
+
+  const PAD = 46;
+  function xForValue(v){
+    const usable = W - PAD*2;
+    return PAD + ( (v - rangeMin) / (rangeMax - rangeMin) ) * usable;
+  }
+
+  function drawBaseLine(){
+    ctx.clearRect(0,0,W,H);
+    const midY = H*0.56;
+
+    // baseline
+    ctx.strokeStyle = 'rgba(244,241,232,0.85)';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(xForValue(rangeMin), midY);
+    ctx.lineTo(xForValue(rangeMax), midY);
+    ctx.stroke();
+
+    // arrow heads
+    ctx.fillStyle = 'rgba(244,241,232,0.85)';
+    drawArrowHead(xForValue(rangeMax), midY, 1);
+    drawArrowHead(xForValue(rangeMin), midY, -1);
+
+    // ticks + labels
+    const step = niceStep(rangeMax - rangeMin);
+    ctx.font = "13px 'JetBrains Mono', monospace";
+    ctx.textAlign = 'center';
+    for (let v = Math.ceil(rangeMin/step)*step; v <= rangeMax; v += step){
+      const x = xForValue(v);
+      const isZero = v === 0;
+      ctx.strokeStyle = isZero ? '#4fb6a6' : 'rgba(244,241,232,0.4)';
+      ctx.lineWidth = isZero ? 2.5 : 1.5;
+      const th = isZero ? 12 : 8;
+      ctx.beginPath();
+      ctx.moveTo(x, midY - th);
+      ctx.lineTo(x, midY + th);
+      ctx.stroke();
+      ctx.fillStyle = isZero ? '#4fb6a6' : 'rgba(244,241,232,0.75)';
+      ctx.fillText(String(v), x, midY + th + 16);
+    }
+
+    return midY;
+  }
+
+  function drawArrowHead(x, y, dir){
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x - dir*9, y - 5);
+    ctx.lineTo(x - dir*9, y + 5);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  function drawArc(fromV, toV, midY, color, progress, label){
+    // progress: 0..1 for animated draw; 1 = fully drawn (trail)
+    const x0 = xForValue(fromV), x1 = xForValue(toV);
+    const dist = Math.abs(x1 - x0);
+    const arcHeight = Math.min(90, 24 + dist*0.28);
+    const topY = midY - arcHeight;
+
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 3;
+    ctx.setLineDash([7,6]);
+    ctx.beginPath();
+    const segs = 40;
+    const upto = Math.max(1, Math.floor(segs*progress));
+    for (let i=0;i<=upto;i++){
+      const t = i/segs;
+      const x = x0 + (x1-x0)*t;
+      const y = midY - Math.sin(Math.PI*t)*arcHeight;
+      if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+    ctx.restore();
+
+    if (progress >= 0.98 && label){
+      const midX = (x0+x1)/2;
+      ctx.font = "700 13px 'JetBrains Mono', monospace";
+      ctx.fillStyle = color;
+      ctx.textAlign = 'center';
+      ctx.fillText(label, midX, topY - 6);
+    }
+
+    return {x: x0 + (x1-x0)*Math.min(1,progress), y: midY - Math.sin(Math.PI*Math.min(1,progress))*arcHeight};
+  }
+
+  function drawMarker(x, y, color){
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(x, y, 9, 0, Math.PI*2);
+    ctx.fillStyle = color;
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 14;
+    ctx.fill();
+    ctx.restore();
+    ctx.beginPath();
+    ctx.arc(x, y, 3.5, 0, Math.PI*2);
+    ctx.fillStyle = '#101c17';
+    ctx.fill();
+  }
+
+  function draw(){
+    if (!W) return;
+    const midY = drawBaseLine();
+
+    // draw completed arcs (trails)
+    arcs.forEach(a => drawArc(a.from, a.to, midY, a.color, 1, a.label));
+
+    // draw active animating arc
+    let markerPos;
+    if (anim){
+      const p = drawArc(anim.from, anim.to, midY, anim.color, anim.t, null);
+      markerPos = p;
+    } else {
+      markerPos = { x: xForValue(currentPos), y: midY };
+    }
+    drawMarker(markerPos.x, markerPos.y, anim ? anim.color : '#f4f1e8');
+  }
+
+  function animateArc(from, to, color, label, onDone){
+    anim = { from, to, color, t: 0, label };
+    const duration = 700 + Math.min(500, Math.abs(to-from)*10);
+    const start = performance.now();
+    function frame(now){
+      const t = Math.min(1, (now-start)/duration);
+      anim.t = t;
+      draw();
+      if (t < 1){
+        requestAnimationFrame(frame);
+      } else {
+        arcs.push({from, to, color, label});
+        currentPos = to;
+        anim = null;
+        draw();
+        if (onDone) onDone();
+      }
+    }
+    requestAnimationFrame(frame);
+  }
+
+  function updateDots(){
+    stepDotsEl.innerHTML = '';
+    steps.forEach((_, i) => {
+      const d = document.createElement('div');
+      d.className = 'dot' + (i <= stepIndex ? ' active' : '');
+      stepDotsEl.appendChild(d);
+    });
+  }
+
+  function buildSteps(a, b, op){
+    const result = op === '+' ? a + b : a - b;
+    const list = [];
+
+    list.push({
+      note: `Kita mulai dari titik <b>0</b> pada garis bilangan.`,
+      run: (done) => { arcs = []; currentPos = 0; draw(); done(); }
+    });
+
+    const dirA = a >= 0 ? 'kanan' : 'kiri';
+    list.push({
+      note: `Melompat ke <b>${a}</b> untuk menempatkan titik awal (bilangan a). Karena a ${a>=0?'positif':'negatif'}, lompat ke <b class="rule">${dirA}</b> sejauh ${Math.abs(a)} satuan.`,
+      run: (done) => animateArc(0, a, '#f2a93b', `a = ${a}`, done)
+    });
+
+    let dirRule, dirWord, target;
+    if (op === '+'){
+      target = a + b;
+      dirWord = b >= 0 ? 'kanan' : 'kiri';
+      dirRule = b >= 0
+        ? `Menambah bilangan positif → lompat ke <b class="rule">kanan</b>.`
+        : `Menambah bilangan negatif → lompat ke <b class="rule">kiri</b>.`;
+    } else {
+      target = a - b;
+      dirWord = b >= 0 ? 'kiri' : 'kanan';
+      dirRule = b >= 0
+        ? `Mengurangi bilangan positif → lompat ke <b class="rule">kiri</b> (kebalikan arah).`
+        : `Mengurangi bilangan negatif → lompat ke <b class="rule">kanan</b> (dua tanda minus jadi plus).`;
+    }
+
+    list.push({
+      note: `Sekarang operasi <b>${op === '+' ? 'tambah' : 'kurang'} ${b}</b>. ${dirRule} Dari ${a}, lompat ${dirWord} sejauh ${Math.abs(b)} satuan.`,
+      run: (done) => animateArc(a, target, '#e85d4e', `${op}${b}`, done)
+    });
+
+    list.push({
+      note: `Titik mendarat di <b>${result}</b>. Jadi <b>${a} ${op} (${b}) = ${result}</b>.`,
+      run: (done) => { done(); }
+    });
+
+    return list;
+  }
+
+  function currentInputs(){
+    const a = parseInt(numAEl.value, 10) || 0;
+    const b = parseInt(numBEl.value, 10) || 0;
+    const op = operatorEl.value;
+    return {a, b, op};
+  }
+
+  function refreshRangeAndPreview(){
+    const {a,b,op} = currentInputs();
+    const r = computeRange(a,b,op);
+    rangeMin = r.lo; rangeMax = r.hi;
+    exprPreview.textContent = `${a} ${op} (${b}) = ...`;
+    resize();
+  }
+
+  function hideResult(){
+    resultCard.classList.remove('show');
+  }
+
+  function showResult(){
+    const {a,b,op} = currentInputs();
+    const result = op === '+' ? a+b : a-b;
+    exprPreview.textContent = `${a} ${op} (${b}) = ${result}`;
+    resultExpr.innerHTML = `${a} ${op} (${b})`;
+    resultValue.textContent = result;
+    resultCard.classList.add('show');
+  }
+
+  function resetDemo(){
+    steps = buildSteps(...Object.values(currentInputs()));
+    stepIndex = -1;
+    arcs = [];
+    anim = null;
+    currentPos = 0;
+    updateDots();
+    stepNote.innerHTML = 'Atur soal di atas, lalu tekan <b>Peragakan</b> atau <b>Langkah Berikutnya</b> untuk mulai.';
+    hideResult();
+    const {a,b,op} = currentInputs();
+    exprPreview.textContent = `${a} ${op} (${b}) = ...`;
+    btnStep.disabled = false;
+    btnPlay.disabled = false;
+    draw();
+  }
+
+  function goToNextStep(){
+    if (stepIndex >= steps.length - 1) return;
+    stepIndex++;
+    updateDots();
+    const s = steps[stepIndex];
+    stepNote.innerHTML = s.note;
+    btnStep.disabled = true;
+    btnPlay.disabled = true;
+    s.run(() => {
+      const last = stepIndex >= steps.length - 1;
+      btnStep.disabled = last;
+      btnPlay.disabled = false;
+      if (last) showResult();
+    });
+  }
+
+  function startDemo(){
+    resetDemo();
+    goToNextStep(); // hanya menjalankan langkah 0 (titik mulai di 0), instan
+  }
+
+  function randomQuestion(){
+    const d = RANGES[difficultyEl.value] || 20;
+    const rand = (lo,hi) => Math.floor(Math.random()*(hi-lo+1)) + lo;
+    const a = rand(-d, d);
+    const b = rand(-d, d);
+    const op = Math.random() < 0.5 ? '+' : '-';
+    numAEl.value = a;
+    numBEl.value = b;
+    operatorEl.value = op;
+    refreshRangeAndPreview();
+    resetDemo();
+  }
+
+  [difficultyEl, numAEl, numBEl, operatorEl].forEach(el => {
+    el.addEventListener('change', () => { refreshRangeAndPreview(); resetDemo(); });
+  });
+
+  btnPlay.addEventListener('click', startDemo);
+  btnStep.addEventListener('click', goToNextStep);
+  btnRandom.addEventListener('click', randomQuestion);
+  btnReset.addEventListener('click', () => { refreshRangeAndPreview(); resetDemo(); });
+
+  // init
+  refreshRangeAndPreview();
+  resetDemo();
+})();
+</script>
+</body>
+</html>
